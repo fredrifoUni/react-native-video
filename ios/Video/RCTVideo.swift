@@ -5,6 +5,18 @@ import GoogleInteractiveMediaAds
 import React
 import Promises
 
+extension UIView {
+    func findViewController() -> UIViewController? {
+        if let nextResponder = self.next as? UIViewController {
+            return nextResponder
+        } else if let nextResponder = self.next as? UIView {
+            return nextResponder.findViewController()
+        } else {
+            return nil
+        }
+    }
+}
+
 class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverHandler {
 
     public var _player:AVPlayer?
@@ -386,6 +398,16 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         
         case .STARTED:
             _rctPlaybackControls?.setUI_isAdDisplaying(isDisplayed: true)
+            
+            //
+            let playerSubviews = self._playerViewController!.view.subviews
+            var playerSubviewsCount = playerSubviews.count
+            playerSubviewsCount = playerSubviewsCount - 1
+            let imaAdViewController = playerSubviews[playerSubviewsCount].findViewController()
+            var viewController:UIViewController! = self.firstAvailableUIViewController()
+            imaAdViewController?.removeFromParent()
+            viewController.present(imaAdViewController!, animated:true, completion: nil)
+            
             break
         
         case .COMPLETE:
@@ -694,8 +716,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                 if let playerViewController = _playerViewController {
                     _wrapperViewController.removeFromParent()
-                    viewController.present(_wrapperViewController, animated:true, completion:{
-                        self._playerViewController?.showsPlaybackControls = false
+                    viewController.present(_playerViewController!, animated:true, completion:{
+                        self._playerViewController?.showsPlaybackControls = true
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
                         self.videoFullscreenPlayerDidPresent()
                     })
@@ -763,10 +785,12 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _wrapperViewController.addChild(_playerViewController!)
             _wrapperViewController.view.addSubview(_playerViewController!.view)
 
-            _rctPlaybackControls = RCTPlaybackController(video: self)
+            //_rctPlaybackControls = RCTPlaybackController(video: self)
 
             _rctPlaybackControls?.translatesAutoresizingMaskIntoConstraints = false
-            _wrapperViewController.view.addSubview(_rctPlaybackControls!)
+            if (_rctPlaybackControls !== nil) {
+                _wrapperViewController.view.addSubview(_rctPlaybackControls!)
+            }
 
             _rctPlaybackControls?.topAnchor.constraint(equalTo: _wrapperViewController.view.topAnchor).isActive = true
             _rctPlaybackControls?.bottomAnchor.constraint(equalTo: _wrapperViewController.view.bottomAnchor).isActive = true
@@ -784,7 +808,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
-        viewController.showsPlaybackControls = false
+        viewController.showsPlaybackControls = true
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
@@ -953,7 +977,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             for viewContoller in _wrapperViewController.children {
                 viewContoller.view.frame = newBounds
             }
-            _rctPlaybackControls!.frame = newBounds
+            
+            _rctPlaybackControls?.frame = newBounds
 
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
