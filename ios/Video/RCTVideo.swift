@@ -224,12 +224,9 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         NotificationCenter.default.post(name: NSNotification.Name("RCTVideo_progress"), object: nil, userInfo: [
             "progress": NSNumber(value: currentTimeSecs / duration)
         ])
-
+        
         if currentTimeSecs >= 0 {
-            if !_didRequestAds && currentTimeSecs >= 0.0001 && _adTagUrl != nil {
-                _imaAdsManager.requestAds()
-                _didRequestAds = true
-            }
+            
             self._videoEnded = false
             onVideoProgress?([
                 "currentTime": NSNumber(value: Float(currentTimeSecs)),
@@ -325,6 +322,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
                         self._imaAdsManager.setUpAdsLoader()
                     }
+                
+                    
 
                     //Perform on next run loop, otherwise onVideoLoadStart is nil
                     self.onVideoLoadStart?([
@@ -1035,6 +1034,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     func handleReadyForDisplay(changeObject: Any, change:NSKeyValueObservedChange<Bool>) {
+        
         onReadyForDisplay?([
             "target": reactTag
         ])
@@ -1135,6 +1135,14 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         _videoLoadStarted = false
         _playerObserver.attachPlayerEventListeners()
         applyModifiers()
+        
+        //Pause if ads will show.
+        if !self._didRequestAds && self._adTagUrl != nil{
+            self._didRequestAds = true
+            if self._imaAdsManager.requestAds() {
+                self.setPaused(true); // If the request fails the admanager will automatically resume the video
+            }
+        }
     }
 
     func handlePlaybackFailed() {
@@ -1161,7 +1169,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     func handlePlaybackLikelyToKeepUp(playerItem:AVPlayerItem, change:NSKeyValueObservedChange<Bool>) {
         if (!(_controls || _fullscreenPlayerPresented) || _playerBufferEmpty) && ((_playerItem?.isPlaybackLikelyToKeepUp) != nil) {
             if(!_adPlaying){
-                setPaused(_paused)
+                //setPaused(_paused)
             }
         }
         _playerBufferEmpty = false

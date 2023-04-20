@@ -24,24 +24,27 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         adsLoader.delegate = self
     }
 
-    func requestAds() {
+    func requestAds() -> Bool {
         // Create ad display container for ad rendering.
-        if _video._playerViewController == nil {return} // TODO: Handle player layer ads
-        let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.view, viewController: _video._playerViewController)
+        if _video._playerViewController != nil {
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.view, viewController: _video._playerViewController)
 
-        let adTagUrl = _video.getAdTagUrl()
-        let contentPlayhead = _video.getContentPlayhead()
+            let adTagUrl = _video.getAdTagUrl()
+            let contentPlayhead = _video.getContentPlayhead()
 
-        if adTagUrl != nil && contentPlayhead != nil {
-            // Create an ad request with our ad tag, display container, and optional user context.
-            let request = IMAAdsRequest(
-                adTagUrl: adTagUrl!,
-                adDisplayContainer: adDisplayContainer,
-                contentPlayhead: contentPlayhead,
-                userContext: nil)
+            if adTagUrl != nil && contentPlayhead != nil {
+                // Create an ad request with our ad tag, display container, and optional user context.
+                let request = IMAAdsRequest(
+                    adTagUrl: adTagUrl!,
+                    adDisplayContainer: adDisplayContainer,
+                    contentPlayhead: contentPlayhead,
+                    userContext: nil)
 
-            adsLoader.requestAds(with: request)
-        }
+                adsLoader.requestAds(with: request)
+                return true
+            }
+        } // TODO: Handle player layer ads
+        return false
     }
 
     // MARK: - Getters
@@ -55,7 +58,8 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     }
 
     // MARK: - IMAAdsLoaderDelegate
-
+    // -adsLoader:adsLoadedWithData:
+    // Called when ads are successfully loaded from the ad servers by the loader.
     func adsLoader(_ loader: IMAAdsLoader, adsLoadedWith adsLoadedData: IMAAdsLoadedData) {
         // Grab the instance of the IMAAdsManager and set yourself as the delegate.
         adsManager = adsLoadedData.adsManager
@@ -69,6 +73,8 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
         adsManager.initialize(with: adsRenderingSettings)
     }
 
+    // -adsLoader:failedWithErrorData
+    // Error reported by the ads loader when loading or requesting an ad fails.
     func adsLoader(_ loader: IMAAdsLoader, failedWith adErrorData: IMAAdLoadingErrorData) {
         if adErrorData.adError.message != nil {
             print("Error loading ads: " + adErrorData.adError.message!)
