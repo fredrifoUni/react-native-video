@@ -20,6 +20,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
     private var _isAdPlaying = true
     private var _isContentPlaying = false // Content play status
+    private var _isLive: Bool = false
     private var _isSeeking: Bool = false
     private var _isTracking: Bool = false // Is dragging seekbar
     private var _isVisible = false
@@ -34,6 +35,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var bottomControlStack: UIStackView = UIStackView()
     private var centerControlStack: UIView = UIView()
     private var curTimeLabel: UILabel = UILabel()
+    private var curTimeWidthConstraint: NSLayoutConstraint?
     private var durTimeLabel: UILabel = UILabel()
     private var fullscreenButtonTop: UIButton = UIButton()
     private var gradienceLayer: CAGradientLayer = CAGradientLayer()
@@ -97,8 +99,8 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         curTimeLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // Width constraint
-        curTimeLabel.addConstraint(NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 47))
         curTimeLabel.lineBreakMode = .byClipping
+        setUI_isLive(_isLive)
     }
     
     func initDurTimeLabel(){
@@ -344,15 +346,16 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     func onProgress(progressTime: CMTime){
         var duration:CMTime? = self._player?.currentItem?.asset.duration
         
-        let isLive: Bool = self.isPlayerLive(duration: duration ?? CMTime.indefinite)
+        self.updateLiveState(duration: duration ?? CMTime.indefinite)
+        
         var progressFloat: Float = Float(CMTimeGetSeconds(progressTime))
         var durationFloat: Float = Float(CMTimeGetSeconds(duration ?? CMTime(value: 0, timescale: 1))) ?? progressFloat
         
         var secondsFromSeekStart : Float = 0.0
-        if(isLive){
+        if(_isLive){
             let liveData = self.getLiveDuration()
             durationFloat = liveData.livePosition
-            secondsFromSeekStart = liveData.secondsFromSeekStart > 0 ? liveData.secondsFromSeekStart : 0.0
+            secondsFromSeekStart = liveData.secondsBehindLive
             self.seekBar.minimumValue = liveData.seekableStart
             self.seekBar.maximumValue = durationFloat
         }else{
@@ -362,9 +365,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         
         // Update UI when user is not dragging or seeking
         if(self._isTracking == false && self._isSeeking == false){
-            let isAnimated = isLive ? false : true
+            let isAnimated = _isLive ? false : true
             self.seekBar.setValue(progressFloat, animated: isAnimated)
-            self.setUi_currentTime(seconds: isLive ? secondsFromSeekStart : progressFloat)
+            self.setUi_currentTime(seconds: _isLive ? secondsFromSeekStart : progressFloat)
             self.setUi_durationTime(seconds: durationFloat)
         }
     }
@@ -381,11 +384,12 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
 
                 case .moved:
                     // handle drag moved
-                    if(self.isPlayerLive(duration: nil)){
+                    if(_isLive){
                         let liveData = getLiveDuration()
-                        let seekableStart = liveData.seekableStart
-                        let seekTime = slider.value - seekableStart
-                        self.setUi_currentTime(seconds: seekTime > 0 ? seekTime : 0.0)
+                        let secondsBehindLive = liveData.secondsBehindLive
+                        //let seekTime = slider.value - secondsBehindLive
+                        let seekTime = min(-(liveData.seekableEnd - slider.value), -0.0)
+                        self.setUi_currentTime(seconds: seekTime)
                     }else{
                         self.setUi_currentTime(seconds: slider.value)
                     }
@@ -445,7 +449,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 seekableEnd = Float(CMTimeGetSeconds(timeRange.end))
                 seekableDuration = Float(CMTimeGetSeconds(timeRange.duration))
                 livePosition = Float(seekableStart + seekableDuration) //
-                secondsBehindLive = currentTime - seekableDuration - seekableStart
+                secondsBehindLive = min(currentTime - seekableDuration - seekableStart, -0.0)
                 
                 secondsFromSeekStart = currentTime - seekableStart
             }
@@ -461,14 +465,18 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         _visibilityTimer?.invalidate()
     }
     
-    func isPlayerLive(duration: CMTime?) -> Bool {
+    func updateLiveState(duration: CMTime?){
         var duration: CMTime? = duration
         if(duration == nil){
             duration = _player?.currentItem?.duration
         }
         
         let isLive: Bool = CMTIME_IS_INDEFINITE(duration ?? CMTime.indefinite)
-        return isLive
+        
+        if _isLive != isLive {
+            _isLive = isLive
+            setUI_isLive(isLive)
+        }
     }
     
     func manualSeekToProgress(seconds: Float){
@@ -497,16 +505,13 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func secondsToTimeLabel(_ seconds: Float) -> String {
-        if(seconds.isNaN){
-            return "NaN"
-        }
+        guard !seconds.isNaN else {return "--:--"}
         
         var secondsInt = Int(seconds)
-        var isNegative = false
         var outputString = ""
         
-        // Handle negative values
-        if(secondsInt < 0){
+        // Handle negative values (and negative zero)
+        if(seconds.sign == .minus){
             secondsInt = abs(secondsInt)
             outputString = "-"
         }
@@ -566,6 +571,19 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         resetVisibilityTimer(_timeInterval: timerInterval)
     }
     
+    func setUI_isLive(_ isLive: Bool){
+        let newWidth: CGFloat = isLive ? 53 : 47
+        
+        if curTimeWidthConstraint != nil {
+            curTimeWidthConstraint?.constant = newWidth
+        }else{
+            curTimeWidthConstraint = NSLayoutConstraint(item: curTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: newWidth)
+            curTimeLabel.addConstraint(curTimeWidthConstraint!)
+        }
+
+        curTimeLabel.setNeedsLayout()
+    }
+    
     @objc func togglePaused(){
         guard let _video = _video else { return }
         let toggleValue = _isAdDisplaying == true ? _isAdPlaying: isPlaying
@@ -586,7 +604,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func setUi_durationTime(seconds: Float){
-        if(self.isPlayerLive(duration: nil)){
+        if(_isLive){
             self.durTimeLabel.text = "Live"
         }else{
             self.durTimeLabel.text = secondsToTimeLabel(seconds)
