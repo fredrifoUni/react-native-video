@@ -772,7 +772,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _wrapperViewController.view.addSubview(_playerViewController!.view)
             
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.onPlayerPressed(_:)))
-            _playerViewController!.view.addGestureRecognizer(tap)
+            _playerViewController?.view.addGestureRecognizer(tap)
 
             _rctPlaybackControls = RCTPlaybackController(video: self)
 
@@ -964,7 +964,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             for viewContoller in _wrapperViewController.children {
                 viewContoller.view.frame = newBounds
             }
-            _rctPlaybackControls!.frame = newBounds
+            _rctPlaybackControls?.frame = newBounds
 
             // also adjust all subviews of contentOverlayView
             for subview in _playerViewController.contentOverlayView?.subviews ?? [] {
