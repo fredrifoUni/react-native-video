@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -240,6 +241,23 @@ class ReactExoplayerView extends FrameLayout implements
         });
 
     }
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        Log.e("CONTROLSTEST", "PRESSEDa   "+event.getKeyCode());
+        boolean handled = false;
+        switch(keyCode){
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+                if(!playerControlView.isVisible()){
+                    Log.e("CONTROLSTEST", "ToggleControl");
+                    handled = true;
+                }
+                playerControlView.show();
+                break;
+        }
+        return handled || super.dispatchKeyEvent(event);
+    }
+
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -513,6 +531,7 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+        playerControlView.bringToFront();
         reLayout(playerControlView);
     }
 
