@@ -490,6 +490,10 @@ class ReactExoplayerView extends FrameLayout implements
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisbility();
 
+        // Ensure that view is in focus (necessary for listening to remote dispatches)
+        pauseButton.requestFocus();
+        playButton.requestFocus();
+
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
             @Override
