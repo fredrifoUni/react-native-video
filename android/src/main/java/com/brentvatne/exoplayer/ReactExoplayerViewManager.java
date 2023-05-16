@@ -106,6 +106,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     }
 
     @Override
+    public void addView(ReactExoplayerView parent, View child, int index) {
+        parent.addView(child, 1);
+    }
+
+    @Override
     public @Nullable Map<String, Object> getExportedCustomDirectEventTypeConstants() {
         MapBuilder.Builder<String, Object> builder = MapBuilder.builder();
         for (String event : VideoEventEmitter.Events) {
