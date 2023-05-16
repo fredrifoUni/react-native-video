@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
 
 import com.facebook.react.bridge.Dynamic;
 import com.facebook.react.bridge.ReadableArray;
