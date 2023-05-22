@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -23,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.WorkerThread;
 import androidx.activity.OnBackPressedCallback;
 
@@ -76,6 +78,7 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.ExoTrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
+import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlayerControlView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -125,6 +128,9 @@ class ReactExoplayerView extends FrameLayout implements
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
     public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
+    public static final long DEFAULT_SKIP_DURATION = 15000;
+    public static final long DEFAULT_INCREMENT_DURATION = 1000;
+    
 
     private static final String TAG = "ReactExoplayerView";
 
@@ -240,6 +246,111 @@ class ReactExoplayerView extends FrameLayout implements
         });
 
     }
+
+    public void setControllerFocusByID(@IdRes int buttonID){
+        final View button = playerControlView.findViewById(buttonID);
+        if(button != null){
+            setControllerFocus(button);
+        }
+    }
+
+    public void setControllerFocus(View button){
+        button.requestFocus();
+    }
+
+    public void setControllerFocusPlayPause(){
+        ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
+        if (playButton.getVisibility() == View.VISIBLE) {
+            setControllerFocus(playButton);
+        } else {
+            setControllerFocusByID(R.id.exo_pause);
+        }
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        int keyAction = event.getAction();
+        int keyRepeatCount = event.getRepeatCount();
+        boolean handled = false;
+
+        // Toggle controller visibility
+        boolean controllerWasVisible = playerControlView.isVisible();
+        switch(keyCode){
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.ACTION_DOWN:
+            case KeyEvent.KEYCODE_HEADSETHOOK:
+            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+            case KeyEvent.KEYCODE_SPACE:
+            case KeyEvent.KEYCODE_MEDIA_PLAY:
+            case KeyEvent.KEYCODE_MEDIA_STOP:
+            case KeyEvent.KEYCODE_MEDIA_PAUSE:
+            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+            case KeyEvent.KEYCODE_MEDIA_REWIND:
+            case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                playerControlView.show();
+
+                if(!controllerWasVisible){
+                    handled = true;
+                }
+                break;
+        }
+
+        // Switch to handle buttons clicks
+        if(keyAction == KeyEvent.ACTION_DOWN && keyRepeatCount == 0){
+            switch(keyCode){
+                case KeyEvent.KEYCODE_HEADSETHOOK:
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                case KeyEvent.KEYCODE_SPACE:
+                    togglePause();
+                    setControllerFocusPlayPause();
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_PLAY:
+                    setPausedModifier(false);
+                    setControllerFocusPlayPause();
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_STOP:
+                case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                    setPausedModifier(true);
+                    setControllerFocusPlayPause();
+                    break;
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                    if(controllerWasVisible){ break; }
+                    setControllerFocusByID(R.id.exo_progress);
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD:
+                    skipTime(DEFAULT_SKIP_DURATION);
+                    setControllerFocusByID(R.id.exo_progress);
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_MEDIA_REWIND:
+                case KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD:
+                    skipTime(-DEFAULT_SKIP_DURATION);
+                    setControllerFocusByID(R.id.exo_progress);
+                    handled = true;
+                    break;
+                case KeyEvent.KEYCODE_BACK:
+                case KeyEvent.KEYCODE_MENU:
+                    // Hide controller if it's visible. Otherwise revert to default logic.
+                    if(controllerWasVisible){
+                        playerControlView.hide();
+                        handled = true;
+                    }
+                    break;
+            }
+        }
+
+        return handled || super.dispatchKeyEvent(event);
+    }
+
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -472,6 +583,13 @@ class ReactExoplayerView extends FrameLayout implements
         fullScreenButton.setOnClickListener(v -> setFullscreen(!isFullscreen));
         updateFullScreenButtonVisbility();
 
+        // Ensure that view is in focus (necessary for listening to remote dispatches)
+        setControllerFocusPlayPause();
+
+        // Define the increment value of the DefaultTimeBar when using a remote or accessibility buttons
+        final DefaultTimeBar timeBar = playerControlView.findViewById(R.id.exo_progress);
+        timeBar.setKeyTimeIncrement(DEFAULT_INCREMENT_DURATION);
+
         // Invoking onPlaybackStateChanged and onPlayWhenReadyChanged events for Player
         eventListener = new Player.Listener() {
             @Override
@@ -513,6 +631,7 @@ class ReactExoplayerView extends FrameLayout implements
             removeViewAt(indexOfPC);
         }
         addView(playerControlView, 1, layoutParams);
+        playerControlView.bringToFront();
         reLayout(playerControlView);
     }
 
@@ -676,7 +795,7 @@ class ReactExoplayerView extends FrameLayout implements
         player = new ExoPlayer.Builder(getContext(), renderersFactory)
                     .setTrackSelector(self.trackSelector)
                     .setBandwidthMeter(bandwidthMeter)
-                    .setLoadControl(loadControl)
+                    //.setLoadControl(loadControl)
                     .setMediaSourceFactory(mediaSourceFactory)
                     .build();
         player.addListener(self);
@@ -952,6 +1071,13 @@ class ReactExoplayerView extends FrameLayout implements
             if (player.getPlaybackState() != Player.STATE_ENDED) {
                 player.setPlayWhenReady(false);
             }
+        }
+    }
+
+    private void skipTime(long stepDuration){
+        if(player != null) {
+            long playerPosition = player.getCurrentPosition();
+            player.seekTo(playerPosition + stepDuration);
         }
     }
 
@@ -1823,6 +1949,14 @@ class ReactExoplayerView extends FrameLayout implements
                 pausePlayback();
             }
         }
+    }
+
+    public void togglePause(){
+        if(player == null){
+            return;
+        }
+        boolean isPlaying = player.isPlaying();
+        setPausedModifier(isPlaying);
     }
 
     public void setMutedModifier(boolean muted) {
