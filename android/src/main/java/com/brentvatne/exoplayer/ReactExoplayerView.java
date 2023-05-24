@@ -129,7 +129,7 @@ class ReactExoplayerView extends FrameLayout implements
     public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
     public static final long DEFAULT_SKIP_DURATION = 15000;
-    public static final long DEFAULT_INCREMENT_DURATION = 1000;
+    public static final long DEFAULT_INCREMENT_DURATION = 15000;
     
 
     private static final String TAG = "ReactExoplayerView";
