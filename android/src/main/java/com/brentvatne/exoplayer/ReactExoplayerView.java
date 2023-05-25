@@ -298,6 +298,13 @@ class ReactExoplayerView extends FrameLayout implements
                 if(!controllerWasVisible){
                     handled = true;
                 }
+
+                // Ensure the controls are focused
+                View focusedChild = this.getFocusedChild();
+                if(focusedChild instanceof PlayerControlView == false){
+                    setControllerFocusPlayPause();
+                }
+
                 break;
         }
 
