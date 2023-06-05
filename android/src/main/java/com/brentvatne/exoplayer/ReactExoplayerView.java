@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Handler;
@@ -16,12 +17,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -125,10 +129,14 @@ class ReactExoplayerView extends FrameLayout implements
         DrmSessionEventListener,
         AdEvent.AdEventListener {
 
+
     public static final double DEFAULT_MAX_HEAP_ALLOCATION_PERCENT = 1;
     public static final double DEFAULT_MIN_BACK_BUFFER_MEMORY_RESERVE = 0;
     public static final double DEFAULT_MIN_BUFFER_MEMORY_RESERVE = 0;
     public static final long DEFAULT_SKIP_DURATION = 15000;
+    public static final int DEFAULT_TV_CONTROLLER_PADDING = 50;
+    public static final int DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE= 18;
+    public static final int DEFAULT_TV_CONTROLLER_DURATION_WIDHT= 65;
     public static final long DEFAULT_INCREMENT_DURATION = 15000;
     
 
@@ -539,6 +547,38 @@ class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new PlayerControlView(getContext());
+
+            // Apply TV specific Styling
+            if(isTelevision()){
+                // Controller padding to account for overscan
+                LinearLayout exoControllerLayout = playerControlView.findViewById(R.id.exo_controller);
+                exoControllerLayout.setPadding(
+                        DEFAULT_TV_CONTROLLER_PADDING,
+                        0,
+                        DEFAULT_TV_CONTROLLER_PADDING,
+                        DEFAULT_TV_CONTROLLER_PADDING
+                );
+
+                //DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE
+                TextView durationView = playerControlView.findViewById(R.id.exo_duration);
+                TextView positionView = playerControlView.findViewById(R.id.exo_position);
+                durationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+                positionView.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_TV_CONTROLLER_DURATION_FONT_SIZE);
+
+                // Calculate label view widths from dp to pixels
+                final float dipScale = getContext().getResources().getDisplayMetrics().density;
+                int durPosWidth = (int) (DEFAULT_TV_CONTROLLER_DURATION_WIDHT * dipScale + 0.5f);
+
+                // Set duration view width
+                ViewGroup.LayoutParams durLayout = durationView.getLayoutParams();
+                durLayout.width = durPosWidth;
+                durationView.setLayoutParams(durLayout);
+
+                // Set position view width
+                ViewGroup.LayoutParams posLayout = positionView.getLayoutParams();
+                posLayout.width = durPosWidth;
+                positionView.setLayoutParams(posLayout);
+            }
         }
 
         if (fullScreenPlayerView == null) {
@@ -887,6 +927,15 @@ class ReactExoplayerView extends FrameLayout implements
         loadVideoStarted = true;
 
         finishPlayerInitialization();
+    }
+
+    /**
+     * Check if exoplayer is running on TV
+     * @return boolean
+     */
+    private boolean isTelevision() {
+        return(themedReactContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEVISION)
+                || themedReactContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK));
     }
 
     private void finishPlayerInitialization() {
