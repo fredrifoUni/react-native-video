@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/exo_controller"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:layoutDirection="ltr"
-    android:background="#CC000000"
+    android:background="#DD000000"
     android:orientation="vertical">
 
     <LinearLayout
@@ -16,31 +17,38 @@
         android:orientation="horizontal">
 
         <ImageButton android:id="@id/exo_prev"
+            android:background="@null"
             style="@style/ExoMediaButton.Previous"
             app:tint="@color/control_button_highlighter"/>
 
         <ImageButton android:id="@id/exo_rew"
+            android:background="@null"
             style="@style/ExoMediaButton.Rewind"
             app:tint="@color/control_button_highlighter"/>
         <FrameLayout
             android:id="@+id/exo_play_pause_container"
+            android:background="@null"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center">
             <ImageButton android:id="@id/exo_play"
+                android:background="@null"
                 style="@style/ExoMediaButton.Play"
                 app:tint="@color/control_button_highlighter"/>
 
             <ImageButton android:id="@id/exo_pause"
+                android:background="@null"
                 style="@style/ExoMediaButton.Pause"
                 app:tint="@color/control_button_highlighter"/>
         </FrameLayout>
 
         <ImageButton android:id="@id/exo_ffwd"
+            android:background="@null"
             style="@style/ExoMediaButton.FastForward"
             app:tint="@color/control_button_highlighter"/>
 
         <ImageButton android:id="@id/exo_next"
+            android:background="@null"
             style="@style/ExoMediaButton.Next"
             app:tint="@color/control_button_highlighter"/>
 
@@ -63,7 +71,7 @@
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
             android:includeFontPadding="false"
-            android:textColor="#FFBEBEBE"/>
+            android:textColor="#FFF"/>
 
         <com.google.android.exoplayer2.ui.DefaultTimeBar
             android:id="@id/exo_progress"
@@ -79,7 +87,7 @@
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
             android:includeFontPadding="false"
-            android:textColor="#FFBEBEBE"/>
+            android:textColor="#FFF"/>
 
         <TextView android:id="@id/exo_duration_live"
             android:layout_width="50dp"
@@ -89,7 +97,7 @@
             android:paddingLeft="4dp"
             android:paddingRight="4dp"
             android:includeFontPadding="false"
-            android:textColor="#FFBEBEBE"
+            android:textColor="#FFF"
             android:text="LIVE"
             android:visibility="gone"/>
 
