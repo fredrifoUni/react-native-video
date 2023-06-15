@@ -31,7 +31,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
 
     
     //Elements
-    private var airplayView: AVRoutePickerView = AVRoutePickerView()
     private var bottomControlStack: UIStackView = UIStackView()
     private var centerControlStack: UIView = UIView()
     private var curTimeLabel: UILabel = UILabel()
@@ -66,10 +65,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     //MARK: Initialize UI elements
-    func initAirplayView(){
-        airplayView.tintColor = .lighterGray
-        airplayView.prioritizesVideoDevices = true
-    }
     
     func initBottomControlStack(){
         bottomControlStack.axis = .horizontal
@@ -82,7 +77,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         bottomControlStack.addArrangedSubview(curTimeLabel)
         bottomControlStack.addArrangedSubview(seekBar)
         bottomControlStack.addArrangedSubview(durTimeLabel)
-        // bottomControlStack.addArrangedSubview(airplayView)
     }
     
     func initCenterControlStack(){
@@ -248,15 +242,14 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.initDurTimeLabel()
         self.initPlayButton()
         self.initFullscreenButtonTop()
-        self.initAirplayView()
         
         // Initialize listeners and delegates
         self.clearPlayerListeners()
         self.initPlayerListeners()
-        airplayView.delegate = self
 
         // Display playback controls
         self.showControls()
+        
     }
     
     //MARK: Override/delegate/callback functions
@@ -264,11 +257,11 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         super.layoutSubviews()
         
         // also adjust all subviews of contentOverlayView
-        for subview in subviews ?? [] {
+        for subview in subviews {
             subview.frame = bounds
         }
         
-        for layer in mainStack.layer.sublayers ?? []{
+        for _ in mainStack.layer.sublayers ?? []{
             gradienceLayer.frame = bounds
         }
         
