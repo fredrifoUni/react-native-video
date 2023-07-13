@@ -27,8 +27,13 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     func requestAds() -> Bool {
         // Create ad display container for ad rendering.
         if _video._playerViewController != nil {
+            // Initiate AD container 
+            #if os(iOS)
             let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.view, viewController: _video._playerViewController)
-
+            #else
+            let adDisplayContainer = IMAAdDisplayContainer(adContainer: _video._playerViewController!.contentOverlayView!, viewController: _video._playerViewController!)
+            #endif
+            
             let adTagUrl = _video.getAdTagUrl()
             let contentPlayhead = _video.getContentPlayhead()
 
@@ -106,12 +111,22 @@ class RCTIMAAdsManager: NSObject, IMAAdsLoaderDelegate, IMAAdsManagerDelegate {
     }
 
     func adsManagerDidRequestContentPause(_ adsManager: IMAAdsManager) {
+        // Prevent seeking while AD is playing
+        #if os(tvOS)
+        _video._playerViewController?.showsPlaybackControls = false
+        #endif
+        
         // Pause the content for the SDK to play ads.
         _video.setPaused(true)
         _video.setAdPlaying(true)
     }
 
     func adsManagerDidRequestContentResume(_ adsManager: IMAAdsManager) {
+        // Allow seeking while video is playing
+        #if os(tvOS)
+        _video._playerViewController?.showsPlaybackControls = true
+        #endif
+        
         // Resume the content since the SDK is done playing ads (at least for now).
         _video.setAdPlaying(false)
         _video.setPaused(false)

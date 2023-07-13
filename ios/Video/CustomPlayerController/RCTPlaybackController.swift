@@ -15,6 +15,25 @@ extension UIColor {
     static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
 }
 
+@objc class UISliderDummy: UIControl {
+    enum TargetType {
+        case valueChanged
+    }
+
+    var isContinuous = true
+
+    var value: Float = 0.0
+    var minimumValue: Float = 0.0
+    var maximumValue: Float = 0.0
+
+    var minimumTrackTintColor: UIColor = .lighterGray
+    var maximumTrackTintColor: UIColor = .darkGray
+    var thumbTintColor: UIColor = .lighterGray
+
+    func addTarget(_ target: Any, action: Selector, for: TargetType) {}
+    func setValue(_ value: Float, animated: Bool) {}
+}
+
 //MARK: Class variables
 class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
@@ -41,8 +60,14 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var iconBundle: Bundle? = Bundle()
     private var mainStack: UIStackView = UIStackView()
     private var playButton: UIButton = UIButton()
-    private var seekBar: UISlider = UISlider()
     private var topControlStack: UIStackView = UIStackView()
+
+    // Platform dependent UI components
+    #if os(iOS)
+    private var seekBar: UISlider = UISlider()
+    #else
+    private var seekBar: UISliderDummy = UISliderDummy()
+    #endif
 
 
 
@@ -65,7 +90,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     //MARK: Initialize UI elements
-    
     func initBottomControlStack(){
         bottomControlStack.axis = .horizontal
         bottomControlStack.spacing = 10
@@ -249,7 +273,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
 
         // Display playback controls
         self.showControls()
-        
     }
     
     //MARK: Override/delegate/callback functions
@@ -365,6 +388,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
+    #if os(tvOS)
+    @objc func onSeekbarChange(slider: UISliderDummy, event: UIEvent) {}
+    #else
     @objc func onSeekbarChange(slider: UISlider, event: UIEvent) {
         if let touchEvent = event.allTouches?.first {
                 switch touchEvent.phase {
@@ -403,6 +429,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 }
             }
     }
+    #endif
     
     func routePickerViewDidEndPresentingRoutes(_ routePickerView: AVRoutePickerView){
         showControls()
