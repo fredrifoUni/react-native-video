@@ -699,7 +699,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if let playerViewController = _playerViewController {
                     _wrapperViewController.removeFromParent()
                     viewController.present(_wrapperViewController, animated:true, completion:{
-                        self._playerViewController?.showsPlaybackControls = false
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
                         self.videoFullscreenPlayerDidPresent()
                     })
@@ -803,7 +802,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
+        #if os(tvOS)
+        viewController.showsPlaybackControls = true
+        #else
         viewController.showsPlaybackControls = false
+        #endif
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
