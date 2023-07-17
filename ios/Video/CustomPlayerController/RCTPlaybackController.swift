@@ -15,6 +15,25 @@ extension UIColor {
     static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
 }
 
+@objc class UISliderDummy: UIControl {
+    enum TargetType {
+        case valueChanged
+    }
+
+    var isContinuous = true
+
+    var value: Float = 0.0
+    var minimumValue: Float = 0.0
+    var maximumValue: Float = 0.0
+
+    var minimumTrackTintColor: UIColor = .lighterGray
+    var maximumTrackTintColor: UIColor = .darkGray
+    var thumbTintColor: UIColor = .lighterGray
+
+    func addTarget(_ target: Any, action: Selector, for: TargetType) {}
+    func setValue(_ value: Float, animated: Bool) {}
+}
+
 //MARK: Class variables
 class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
@@ -31,7 +50,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
 
     
     //Elements
-    private var airplayView: AVRoutePickerView = AVRoutePickerView()
     private var bottomControlStack: UIStackView = UIStackView()
     private var centerControlStack: UIView = UIView()
     private var curTimeLabel: UILabel = UILabel()
@@ -42,8 +60,14 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var iconBundle: Bundle? = Bundle()
     private var mainStack: UIStackView = UIStackView()
     private var playButton: UIButton = UIButton()
-    private var seekBar: UISlider = UISlider()
     private var topControlStack: UIStackView = UIStackView()
+
+    // Platform dependent UI components
+    #if os(iOS)
+    private var seekBar: UISlider = UISlider()
+    #else
+    private var seekBar: UISliderDummy = UISliderDummy()
+    #endif
 
 
 
@@ -66,11 +90,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     //MARK: Initialize UI elements
-    func initAirplayView(){
-        airplayView.tintColor = .lighterGray
-        airplayView.prioritizesVideoDevices = true
-    }
-    
     func initBottomControlStack(){
         bottomControlStack.axis = .horizontal
         bottomControlStack.spacing = 10
@@ -82,7 +101,6 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         bottomControlStack.addArrangedSubview(curTimeLabel)
         bottomControlStack.addArrangedSubview(seekBar)
         bottomControlStack.addArrangedSubview(durTimeLabel)
-        // bottomControlStack.addArrangedSubview(airplayView)
     }
     
     func initCenterControlStack(){
@@ -248,12 +266,10 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.initDurTimeLabel()
         self.initPlayButton()
         self.initFullscreenButtonTop()
-        self.initAirplayView()
         
         // Initialize listeners and delegates
         self.clearPlayerListeners()
         self.initPlayerListeners()
-        airplayView.delegate = self
 
         // Display playback controls
         self.showControls()
@@ -264,11 +280,11 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         super.layoutSubviews()
         
         // also adjust all subviews of contentOverlayView
-        for subview in subviews ?? [] {
+        for subview in subviews {
             subview.frame = bounds
         }
         
-        for layer in mainStack.layer.sublayers ?? []{
+        for _ in mainStack.layer.sublayers ?? []{
             gradienceLayer.frame = bounds
         }
         
@@ -372,6 +388,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
+    #if os(tvOS)
+    @objc func onSeekbarChange(slider: UISliderDummy, event: UIEvent) {}
+    #else
     @objc func onSeekbarChange(slider: UISlider, event: UIEvent) {
         if let touchEvent = event.allTouches?.first {
                 switch touchEvent.phase {
@@ -410,6 +429,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 }
             }
     }
+    #endif
     
     func routePickerViewDidEndPresentingRoutes(_ routePickerView: AVRoutePickerView){
         showControls()

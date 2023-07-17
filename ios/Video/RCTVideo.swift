@@ -699,7 +699,6 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 if let playerViewController = _playerViewController {
                     _wrapperViewController.removeFromParent()
                     viewController.present(_wrapperViewController, animated:true, completion:{
-                        self._playerViewController?.showsPlaybackControls = false
                         self._playerViewController?.autorotate = self._fullscreenAutorotate
                         self.videoFullscreenPlayerDidPresent()
                     })
@@ -761,6 +760,19 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         self.addSubview(_wrapperViewController.view)
         return _wrapperViewController
     }
+    
+    // Initiate custom playback controller (seekbar, play, pause etc)
+    func useCustomPlaybackController() {
+        _rctPlaybackControls = RCTPlaybackController(video: self)
+        _wrapperViewController.view.addSubview(_rctPlaybackControls!)
+
+        // Configure sizing
+        _rctPlaybackControls?.translatesAutoresizingMaskIntoConstraints = false
+        _rctPlaybackControls?.topAnchor.constraint(equalTo: _wrapperViewController.view.topAnchor).isActive = true
+        _rctPlaybackControls?.bottomAnchor.constraint(equalTo: _wrapperViewController.view.bottomAnchor).isActive = true
+        _rctPlaybackControls?.leftAnchor.constraint(equalTo: _wrapperViewController.view.leftAnchor).isActive = true
+        _rctPlaybackControls?.rightAnchor.constraint(equalTo: _wrapperViewController.view.rightAnchor).isActive = true
+    }
 
     func usePlayerViewController() {
         guard let _player = _player, let _playerItem = _playerItem else { return }
@@ -773,16 +785,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             
             let tap = UITapGestureRecognizer(target: self, action: #selector(self.onPlayerPressed(_:)))
             _playerViewController?.view.addGestureRecognizer(tap)
-
-            _rctPlaybackControls = RCTPlaybackController(video: self)
-
-            _rctPlaybackControls?.translatesAutoresizingMaskIntoConstraints = false
-            _wrapperViewController.view.addSubview(_rctPlaybackControls!)
-
-            _rctPlaybackControls?.topAnchor.constraint(equalTo: _wrapperViewController.view.topAnchor).isActive = true
-            _rctPlaybackControls?.bottomAnchor.constraint(equalTo: _wrapperViewController.view.bottomAnchor).isActive = true
-            _rctPlaybackControls?.leftAnchor.constraint(equalTo: _wrapperViewController.view.leftAnchor).isActive = true
-            _rctPlaybackControls?.rightAnchor.constraint(equalTo: _wrapperViewController.view.rightAnchor).isActive = true
+            
+            // Add the custom playback controller
+            #if os(iOS)
+            useCustomPlaybackController()
+            #endif
         }
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
@@ -795,7 +802,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     func createPlayerViewController(player:AVPlayer, withPlayerItem playerItem:AVPlayerItem) -> RCTVideoPlayerViewController {
         let viewController = RCTVideoPlayerViewController()
+        #if os(tvOS)
+        viewController.showsPlaybackControls = true
+        #else
         viewController.showsPlaybackControls = false
+        #endif
         viewController.rctDelegate = self
         viewController.preferredOrientation = _fullscreenOrientation
 
