@@ -242,7 +242,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     // MARK: - Player and source
     @objc
     func setSrc(_ source:NSDictionary!) {
-        DispatchQueue.global(qos: .default).async {
+        let closure = {
             self._didRequestAds = false
             self._adsCompleted = true
             self._source = VideoSource(source)
@@ -338,6 +338,8 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 }.catch{_ in }
             self._videoLoadStarted = true
         }
+        
+        DispatchQueue.global(qos: .default).async(execute: closure)
     }
 
     @objc
