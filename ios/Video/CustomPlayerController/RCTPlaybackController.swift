@@ -45,7 +45,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isVisible = false
     private var _playerItemContext = 0
     private var _timeObserverToken: Any?
-    private var _video: RCTVideo?
+    private weak var _video: RCTVideo?
     private var _visibilityTimer: Timer?
 
     
