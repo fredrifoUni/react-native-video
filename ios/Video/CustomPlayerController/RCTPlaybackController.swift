@@ -1,40 +1,9 @@
-//
-//  RCTPlaybackController.swift
-//  react-native-video
-//
-//  Created by 206753751 on 3/30/23.
-//
-
 import Foundation
 import AVFoundation
 import AVKit
 import MediaPlayer
 
-//MARK: Extensions
-extension UIColor {
-    static let lighterGray = UIColor(red: 254, green: 255, blue: 253, alpha: 1)
-}
-
-@objc class UISliderDummy: UIControl {
-    enum TargetType {
-        case valueChanged
-    }
-
-    var isContinuous = true
-
-    var value: Float = 0.0
-    var minimumValue: Float = 0.0
-    var maximumValue: Float = 0.0
-
-    var minimumTrackTintColor: UIColor = .lighterGray
-    var maximumTrackTintColor: UIColor = .darkGray
-    var thumbTintColor: UIColor = .lighterGray
-
-    func addTarget(_ target: Any, action: Selector, for: TargetType) {}
-    func setValue(_ value: Float, animated: Bool) {}
-}
-
-//MARK: Class variables
+// MARK: Class variables
 class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _isAdDisplaying = false // Advertisements play status
     private var _isAdPlaying = true
@@ -49,7 +18,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var _visibilityTimer: Timer?
 
     
-    //Elements
+    // Elements
     private var bottomControlStack: UIStackView = UIStackView()
     private var centerControlStack: UIView = UIView()
     private var curTimeLabel: UILabel = UILabel()
@@ -63,16 +32,16 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var topControlStack: UIStackView = UIStackView()
 
     // Platform dependent UI components
-    #if os(iOS)
+#if os(iOS)
     private var seekBar: UISlider = UISlider()
-    #else
+#else
     private var seekBar: UISliderDummy = UISliderDummy()
-    #endif
-
+#endif
+    
 
 
     
-    //MARK: Helper variables
+    // MARK: Helper variables
     private var _player : AVPlayer? {
         return self._video?._player
     }
@@ -89,7 +58,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         return self._video?._fullscreenPlayerPresented == true
     }
     
-    //MARK: Initialize UI elements
+    // MARK: Initialize UI elements
     func initBottomControlStack(){
         bottomControlStack.axis = .horizontal
         bottomControlStack.spacing = 10
@@ -241,7 +210,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         topControlStack.addArrangedSubview(UIView())
     }
     
-    //MARK: UIView functions
+    // MARK: UIView functions
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
@@ -275,7 +244,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         self.showControls()
     }
     
-    //MARK: Override/delegate/callback functions
+    // MARK: Override/delegate/callback functions
     override func layoutSubviews(){
         super.layoutSubviews()
         
@@ -388,9 +357,9 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
-    #if os(tvOS)
+#if os(tvOS)
     @objc func onSeekbarChange(slider: UISliderDummy, event: UIEvent) {}
-    #else
+#else
     @objc func onSeekbarChange(slider: UISlider, event: UIEvent) {
         if let touchEvent = event.allTouches?.first {
                 switch touchEvent.phase {
@@ -429,7 +398,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
                 }
             }
     }
-    #endif
+#endif
     
     func routePickerViewDidEndPresentingRoutes(_ routePickerView: AVRoutePickerView){
         showControls()
@@ -438,7 +407,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     
     
     
-    //MARK: Playback functions
+    // MARK: Playback functions
     func clearPlayerListeners(){
         if let timeObserverToken = _timeObserverToken {
             _player?.removeTimeObserver(timeObserverToken)
@@ -618,7 +587,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         }
     }
     
-    //MARK: UI setters
+    // MARK: UI setters
     func setUi_currentTime(seconds: Float){
         self.curTimeLabel.text = secondsToTimeLabel(seconds)
     }
@@ -637,7 +606,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         // Disable seekbar when ad is displayed
         seekBar.isEnabled = !adDisplayed
         
-        //Hide controls when ad is displayed
+        // Hide controls when ad is displayed
         if(adDisplayed){
             hideControls()
         }
