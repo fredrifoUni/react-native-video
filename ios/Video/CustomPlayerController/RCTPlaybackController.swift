@@ -479,41 +479,11 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
         print("Seeking to time(s): \(seconds)")
     }
     
-    func numToString(myInt: Int) -> String{
-        return String(format: "%02d", myInt)
-    }
-    
     // Hide playback controls after a given time (defaulted to 4s)
     func resetVisibilityTimer(_timeInterval: Double? = nil) {
         var timeInterval : Double = _timeInterval != nil ? _timeInterval! : 4.0
         invalidateVisibilityTimer()
         _visibilityTimer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(hideControls), userInfo: nil, repeats: false)
-    }
-    
-    func secondsToTimeLabel(_ seconds: Float) -> String {
-        guard !seconds.isNaN else {return "--:--"}
-        
-        var secondsInt = Int(seconds)
-        var outputString = ""
-        
-        // Handle negative values (and negative zero)
-        if(seconds.sign == .minus){
-            secondsInt = abs(secondsInt)
-            outputString = "-"
-        }
-        
-        // Add hours if applicable (hh:)
-        if(seconds > 3600){
-            let h1 = numToString(myInt: secondsInt / 3600)
-            outputString.append("\(h1):")
-        }
-        
-        // Add minutes and seconds (mm:ss)
-        let m1 = numToString(myInt: (secondsInt % 3600) / 60)
-        let s1 = numToString(myInt: (secondsInt % 3600) % 60)
-        outputString.append("\(m1):\(s1)")
-        
-        return outputString
     }
     
     func setAdPlaying(playing: Bool){
@@ -623,5 +593,41 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     @objc func setUi_forceRefresh(){
         setUI_isPlaying(_isPlaying: _isAdDisplaying ? _isAdPlaying : _isContentPlaying)
         setUI_isFullscreen(_isFullscreen: isFullscreen)
+    }
+}
+
+// MARK: Helper function extensions
+private extension RCTPlaybackController {
+    /// Converts integer and prefixs with 0 when the string is less than 2 characters wide
+    func numToString(myInt: Int) -> String {
+        return String(format: "%02d", myInt)
+    }
+    
+    // TODO: Look into using built in helpers and start using TimeInterval
+    /// Converts seconds to readable string (mm:ss or hh:mm:ss)
+    func secondsToTimeLabel(_ seconds: Float) -> String {
+        guard !seconds.isNaN else {return "--:--"}
+        
+        var secondsInt = Int(seconds)
+        var outputString = ""
+        
+        // Handle negative values (and negative zero)
+        if(seconds.sign == .minus){
+            secondsInt = abs(secondsInt)
+            outputString = "-"
+        }
+        
+        // Add hours if applicable (hh:)
+        if(seconds > 3600){
+            let h1 = numToString(myInt: secondsInt / 3600)
+            outputString.append("\(h1):")
+        }
+        
+        // Add minutes and seconds (mm:ss)
+        let m1 = numToString(myInt: (secondsInt % 3600) / 60)
+        let s1 = numToString(myInt: (secondsInt % 3600) % 60)
+        outputString.append("\(m1):\(s1)")
+        
+        return outputString
     }
 }
