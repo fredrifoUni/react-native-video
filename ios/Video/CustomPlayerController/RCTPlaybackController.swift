@@ -26,7 +26,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     private var durTimeLabel: UILabel = UILabel()
     private var fullscreenButtonTop: UIButton = UIButton()
     private var gradienceLayer: CAGradientLayer = CAGradientLayer()
-    private var iconBundle: Bundle? = Bundle()
+    private var iconBundle: Bundle?
     private var mainStack: UIStackView = UIStackView()
     private var playButton: UIButton = UIButton()
     private var topControlStack: UIStackView = UIStackView()
@@ -129,10 +129,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func initIconBundle(){
-        let podBundle = Bundle(for: Self.self) // for getting pod url
-        if let url = podBundle.url(forResource: "IconBundle", withExtension: "bundle") {
-            iconBundle = Bundle.init(url: url)
-        }
+        iconBundle = Bundle(for: Self.self).resourceBundle(name: "IconBundle")
     }
     
     func initMainStack(){
