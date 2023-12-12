@@ -196,7 +196,7 @@ class RCTPlaybackController: UIView, AVRoutePickerViewDelegate {
     }
     
     func initPlayerListeners(){
-        _timeObserverToken = _player?.addPeriodicTimeObserver(forInterval: CMTime(value: CMTimeValue(1), timescale: 2), queue: DispatchQueue.main) {[weak self] (progressTime) in
+        _timeObserverToken = _player?.addPeriodicTimeObserver(forInterval: CMTime(value: CMTimeValue(1), timescale: 2), queue: .main) {[weak self] (progressTime) in
             self?.onProgress(progressTime: progressTime)
         }
         
