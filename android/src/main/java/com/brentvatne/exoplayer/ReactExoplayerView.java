@@ -295,22 +295,6 @@ public class ReactExoplayerView extends FrameLayout implements
         });
     }
 
-//    public void refreshTitle_fork(){
-//        if( playerControlView == null ){ return; }
-//        LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
-//
-//        // Hide title if it's not available
-//        if( this.srcTitle == null || this.srcTitle.length() < 1 ){
-//            exoTitleLayout.setVisibility(INVISIBLE);
-//            return;
-//        }
-//
-//        // Add title to the TextView and make it visible
-//        TextView titleView = playerControlView.findViewById(R.id.exo_title);
-//        titleView.setText(this.srcTitle);
-//        exoTitleLayout.setVisibility(VISIBLE);
-//    }
-
     public void setControllerFocusByID(@IdRes int buttonID){
         final View button = playerControlView.findViewById(buttonID);
         if(button != null){
@@ -360,8 +344,8 @@ public class ReactExoplayerView extends FrameLayout implements
                 }
 
                 // Ensure the controls are focused
-                View focusedChild = this.getFocusedChild();
-                if(focusedChild instanceof LegacyPlayerControlView == false){
+                View focusedChild = playerControlView.getFocusedChild();
+                if( focusedChild == null){
                     setControllerFocusPlayPause();
                 }
 
@@ -1673,12 +1657,6 @@ public class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onAudioBecomingNoisy() {
         eventEmitter.onVideoAudioBecomingNoisy.invoke();
-    }
-
-    // Player.Listener implementation
-    @Override
-    public void onIsLoadingChanged(boolean isLoading) {
-//        refreshTitle_fork();
     }
 
     @Override
