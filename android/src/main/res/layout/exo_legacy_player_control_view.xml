@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/exo_controller_wrapper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -58,9 +59,11 @@
         android:orientation="horizontal">
 
         <ImageButton android:id="@+id/exo_prev"
+            app:tint="@color/control_button_highlighter"
             style="@style/ExoMediaButton.Previous"/>
 
         <ImageButton android:id="@+id/exo_rew"
+            app:tint="@color/control_button_highlighter"
             style="@style/ExoMediaButton.Rewind"/>
         <FrameLayout
             android:id="@+id/exo_play_pause_container"
@@ -68,16 +71,20 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center">
             <ImageButton android:id="@+id/exo_play"
+                app:tint="@color/control_button_highlighter"
                 style="@style/ExoMediaButton.Play"/>
 
             <ImageButton android:id="@+id/exo_pause"
+                app:tint="@color/control_button_highlighter"
                 style="@style/ExoMediaButton.Pause"/>
         </FrameLayout>
 
         <ImageButton android:id="@+id/exo_ffwd"
+            app:tint="@color/control_button_highlighter"
             style="@style/ExoMediaButton.FastForward"/>
 
         <ImageButton android:id="@+id/exo_next"
+            app:tint="@color/control_button_highlighter"
             style="@style/ExoMediaButton.Next"/>
 
     </LinearLayout>
@@ -114,6 +121,7 @@
             android:textColor="@color/silver_gray"/>
 
         <ImageButton
+            app:tint="@color/control_button_highlighter"
             android:id="@+id/exo_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -121,6 +129,7 @@
             />
 
         <ImageButton
+            app:tint="@color/control_button_highlighter"
             android:id="@+id/exo_fullscreen"
             style="@style/ExoMediaButton.FullScreen"
             android:layout_width="@dimen/full_screen_size"
