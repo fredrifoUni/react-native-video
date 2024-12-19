@@ -10,10 +10,12 @@
     <TextView android:id="@+id/exo_controller_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="6dp"
+        android:textColor="@color/silver_gray"
         android:textSize="@dimen/position_duration_text_size"
         android:textStyle="bold"
         android:includeFontPadding="false"
-        android:textColor="@color/white"
         />
 
     <LinearLayout
