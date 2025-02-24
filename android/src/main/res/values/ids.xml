@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="exo_duration_live" type="id" />
+    <item name="exo_like" type="id" />
+    <item name="exo_dislike" type="id" />
 </resources>

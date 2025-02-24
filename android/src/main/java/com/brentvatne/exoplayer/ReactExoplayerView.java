@@ -12,11 +12,14 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.accessibility.CaptioningManager;
@@ -93,6 +96,7 @@ import androidx.media3.extractor.metadata.emsg.EventMessage;
 import androidx.media3.extractor.metadata.id3.Id3Frame;
 import androidx.media3.extractor.metadata.id3.TextInformationFrame;
 import androidx.media3.ui.LegacyPlayerControlView;
+import androidx.media3.ui.PlayerView;
 
 import com.brentvatne.common.api.ResizeMode;
 import com.brentvatne.common.api.SubtitleStyle;
@@ -141,6 +145,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.IdRes;
 import androidx.media3.ui.DefaultTimeBar;
+import android.widget.ImageView;
 // END: FORK
 
 @SuppressLint("ViewConstructor")
@@ -183,6 +188,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private DefaultTrackSelector trackSelector;
     private boolean playerNeedsSource;
 
+    private int contentRating = 0;
     private int resumeWindow;
     private long resumePosition;
     private boolean loadVideoStarted;
@@ -440,13 +446,14 @@ public class ReactExoplayerView extends FrameLayout implements
 
     public void initializePlayerControlsTV_fork(LegacyPlayerControlView playerControlView){
         if(!isTelevision()){ return; }
-        
+
         // Add padding to player title to account for overscan
         LinearLayout exoTitleLayout = playerControlView.findViewById(R.id.exo_controller);
+        int titleOffset = 30;
         exoTitleLayout.setPadding(
+            DEFAULT_TV_CONTROLLER_PADDING + titleOffset,
             DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING,
-            DEFAULT_TV_CONTROLLER_PADDING,
+            DEFAULT_TV_CONTROLLER_PADDING + titleOffset,
             DEFAULT_TV_CONTROLLER_PADDING
         );
 
@@ -630,6 +637,7 @@ public class ReactExoplayerView extends FrameLayout implements
     private void initializePlayerControl() {
         if (playerControlView == null) {
             playerControlView = new LegacyPlayerControlView(getContext());
+            playerControlView.hide(); // Prevent player controls initial visible state
 
             // FORK: Apply TV specific Styling
             initializePlayerControlsTV_fork(playerControlView);
@@ -653,6 +661,21 @@ public class ReactExoplayerView extends FrameLayout implements
             // FORK: Allow controls to toggle while Ads are playing
             togglePlayerControlVisibility();
         });
+
+        //Handling the playButton click event
+        LinearLayout likeButton = playerControlView.findViewById(R.id.exo_like);
+
+        likeButton.setOnClickListener((View v) -> {
+            eventEmitter.contentRatingChange(this.contentRating == 1 ? 0 : 1);
+        });
+
+        //Handling the playButton click event
+        LinearLayout dislikeButton = playerControlView.findViewById(R.id.exo_dislike);
+        dislikeButton.setOnClickListener((View v) -> {
+            eventEmitter.contentRatingChange(this.contentRating == -1 ? 0 : -1);
+        });
+
+        refreshContentRatingButtons();
 
         //Handling the playButton click event
         ImageButton playButton = playerControlView.findViewById(R.id.exo_play);
@@ -1376,10 +1399,6 @@ public class ReactExoplayerView extends FrameLayout implements
                         selectTrackWhenReady = false;
                         setSelectedTrack(C.TRACK_TYPE_VIDEO, videoTrackType, videoTrackValue);
                     }
-                    // Setting the visibility for the playerControlView
-                    if (playerControlView != null) {
-                        playerControlView.show();
-                    }
                     setKeepScreenOn(preventsDisplaySleepDuringVideoPlayback);
                     break;
                 case Player.STATE_ENDED:
@@ -1854,6 +1873,35 @@ public class ReactExoplayerView extends FrameLayout implements
     private void applyModifiers() {
         setRepeatModifier(repeat);
         setMutedModifier(muted);
+    }
+
+    private void refreshContentRatingButtons(){
+        if(playerControlView == null) { return; }
+
+        boolean isLiked = this.contentRating == 1;
+        boolean isDisliked = this.contentRating == -1;
+
+        // Like Button
+        LinearLayout likeButtonLayout = (LinearLayout) playerControlView.findViewById(R.id.exo_like);
+        ImageView likeButtonIcon = (ImageView) likeButtonLayout.findViewById(R.id.nbc_toggle_button_icon);
+        TextView likeButtonText = (TextView) likeButtonLayout.findViewById(R.id.nbc_toggle_button_text);
+        likeButtonIcon.setImageResource(isLiked ? R.drawable.thumbs_up_selected: R.drawable.thumbs_up);
+        likeButtonText.setText( isLiked ? "Liked" : "Like");
+
+        // Dislike button
+        LinearLayout dislikeButtonLayout = (LinearLayout) playerControlView.findViewById(R.id.exo_dislike);
+        ImageView dislikeButtonIcon = (ImageView) dislikeButtonLayout.findViewById(R.id.nbc_toggle_button_icon);
+        TextView dislikeButtonText = (TextView) dislikeButtonLayout.findViewById(R.id.nbc_toggle_button_text);
+        dislikeButtonIcon.setImageResource(isDisliked ? R.drawable.thumbs_down_selected : R.drawable.thumbs_down);
+        dislikeButtonText.setText(isDisliked ? "Disliked": "Dislike");
+
+        // Force UI to update
+        reLayout(playerControlView);
+    }
+
+    public void setContentRating(int contentRating){
+        this.contentRating = contentRating;
+        this.refreshContentRatingButtons();
     }
 
     public void setRepeatModifier(boolean repeat) {

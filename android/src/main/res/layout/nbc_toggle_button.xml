@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/nbc_toggle_button_background_color"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:minWidth="130dp"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    >
+
+    <ImageView
+        android:id="@+id/nbc_toggle_button_icon"
+        android:duplicateParentState="true"
+        android:layout_gravity="center_vertical"
+        android:layout_height="24dp"
+        android:layout_marginRight="2dp"
+        android:layout_width="24dp"
+        android:src="@drawable/thumbs_up"
+        android:tint="@drawable/nbc_toggle_button_text_color"
+        />
+
+    <TextView
+        android:id="@+id/nbc_toggle_button_text"
+        android:duplicateParentState="true"
+        android:layout_gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:textColor="@drawable/nbc_toggle_button_text_color"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        />
+</LinearLayout>

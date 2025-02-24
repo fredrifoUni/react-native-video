@@ -4,4 +4,5 @@ import Foundation
 protocol RCTVideoPlayerViewControllerDelegate: class {
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController)
     func videoPlayerViewControllerDidDismiss(playerViewController: AVPlayerViewController)
+    func onContentRating(rating: Int)
 }

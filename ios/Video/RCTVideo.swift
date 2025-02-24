@@ -102,6 +102,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     #endif
 
     // Events
+    @objc var onContentRating: RCTDirectEventBlock?
     @objc var onVideoLoadStart: RCTDirectEventBlock?
     @objc var onVideoLoad: RCTDirectEventBlock?
     @objc var onVideoBuffer: RCTDirectEventBlock?
@@ -149,7 +150,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         switch(type){
         case .LOADED:
             _adsCompleted = false
-            
+
         case .TAPPED:
             _rctPlaybackControls?.toggleControlVisibility(visible: nil)
 
@@ -173,11 +174,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             break
         }
     }
-    
+
     func requestAds(){
         if !self._didRequestAds && self._adTagUrl != nil{
             self._didRequestAds = true
-            
+
             if self._imaAdsManager.requestAds() {
                 //Pause if ads will show.
                 self.setPaused(true); // If the request fails the admanager will automatically resume the video
@@ -185,7 +186,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
     }
     #endif
-    
+
     func refreshBuffering() {
         // Set buffering for ads
         if _adPlaying == true {
@@ -199,7 +200,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
             _loadingSpinner.stopAnimating()
         }
     }
-    
+
     func setAdBuffering(_ buffering: Bool) {
         _adsBuffering = buffering
         refreshBuffering()
@@ -222,17 +223,17 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     @objc func togglePlaybackController(){
         _rctPlaybackControls?.toggleControlVisibility(visible: true)
     }
-    
+
     func removeWrapperController(){
         // Toggle off full screen presentation
         self.setFullscreen(false)
-        
+
         for viewContoller in _wrapperViewController.children{
             viewContoller.willMove(toParent: nil)
             viewContoller.view.removeFromSuperview()
             viewContoller.removeFromParent()
         }
-                
+
         _loadingSpinner.removeFromSuperview()
         _wrapperViewController.removeFromParent()
     }
@@ -250,7 +251,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(self.onPlayerPressed(_:)))
         _playerViewController?.view.addGestureRecognizer(tap)
-        
+
         // Add loading spinner
         useBufferIndicator()
 
@@ -259,11 +260,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         useCustomPlaybackController()
         #endif
     }
-    
+
     // Initiates buffer indicator
     func useBufferIndicator(){
         _wrapperViewController.view.addSubview(_loadingSpinner)
-        
+
         // Configure spinner
         _loadingSpinner.center = _wrapperViewController.view.center
         _loadingSpinner.hidesWhenStopped = true
@@ -636,7 +637,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         let initializeSource = {
             self._didRequestAds = false
             self._adsCompleted = true
-            
+
             self._source = VideoSource(source)
             if self._source?.uri == nil || self._source?.uri == "" {
                 self._player?.replaceCurrentItem(with: nil)
@@ -741,6 +742,11 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - Prop setters
+
+    @objc
+    func setContentRating (_ rating: Int){
+        _playerViewController?.setContentRating(rating)
+    }
 
     @objc
     func setResizeMode(_ mode: String) {
@@ -1246,6 +1252,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - RCTVideoPlayerViewControllerDelegate
+
+    func onContentRating(rating: Int) {
+        onContentRating?(["rating": rating, "target": reactTag])
+    }
 
     func videoPlayerViewControllerWillDismiss(playerViewController: AVPlayerViewController) {
         if _playerViewController == playerViewController

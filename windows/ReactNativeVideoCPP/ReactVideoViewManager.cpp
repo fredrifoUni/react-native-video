@@ -46,6 +46,7 @@ IMapView<hstring, ViewManagerPropertyType> ReactVideoViewManager::NativeProps() 
   nativeProps.Insert(L"muted", ViewManagerPropertyType::Boolean);
   nativeProps.Insert(L"volume", ViewManagerPropertyType::Number);
   nativeProps.Insert(L"seek", ViewManagerPropertyType::Number);
+  nativeProps.Insert(L"contentRating", ViewManagerPropertyType::Int);
   nativeProps.Insert(L"controls", ViewManagerPropertyType::Boolean);
   nativeProps.Insert(L"fullscreen", ViewManagerPropertyType::Boolean);
   nativeProps.Insert(L"progressUpdateInterval", ViewManagerPropertyType::Number);

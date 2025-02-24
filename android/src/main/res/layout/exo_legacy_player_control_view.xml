@@ -13,23 +13,35 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:gravity="top"
+        android:gravity="center"
         android:layout_margin="0dp"
         android:layoutDirection="ltr"
         android:orientation="horizontal"
         android:visibility="invisible"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         >
         <TextView
             android:id="@+id/exo_title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:includeFontPadding="false"
             android:textColor="#FFF"
-            android:textSize="14sp"
+            android:textSize="24sp"
+            android:layout_weight="1"
             android:textStyle="bold"
+
+            android:paddingRight="30dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:singleLine="true"
             />
 
+        <include layout="@layout/nbc_toggle_button" android:id="@id/exo_like" />
+        <LinearLayout android:layout_width="10dp" android:layout_height="wrap_content" />
+        <include layout="@layout/nbc_toggle_button" android:id="@id/exo_dislike" />
+        <LinearLayout android:layout_width="7dp" android:layout_height="wrap_content" />
     </LinearLayout>
 
     <!--    Spacer-->
@@ -41,7 +53,7 @@
         />
 
     <LinearLayout
-        android:id="@id/exo_bottom_bar"
+        android:id="@+id/exo_bottom_bar"
         android:background="#DD000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,7 +77,8 @@
 
             <ImageButton
                 android:id="@+id/exo_rew"
-                style="@style/ExoMediaButton.Rewind" />
+                style="@style/ExoMediaButton.Rewind"
+                app:tint="@color/control_button_highlighter" />
 
             <FrameLayout
                 android:id="@+id/exo_play_pause_container"

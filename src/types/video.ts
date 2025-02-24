@@ -190,6 +190,7 @@ export interface ReactVideoProps extends ReactVideoEvents, ViewProps {
   automaticallyWaitsToMinimizeStalling?: boolean; // iOS
   bufferConfig?: BufferConfig; // Android
   chapters?: Chapters[]; // iOS
+  contentRating?: number; // tvOS androidTV
   contentStartTime?: number; // Android
   controls?: boolean;
   currentPlaybackTime?: number; // Android

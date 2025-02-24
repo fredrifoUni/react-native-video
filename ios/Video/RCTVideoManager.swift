@@ -41,6 +41,13 @@ class RCTVideoManager: RCTViewManager {
             videoView?.setSeek(info)
         })
     }
+    
+    @objc(contentRating:reactTag:)
+    func contentRating(rating: Int, reactTag: NSNumber) {
+        performOnVideoView(withReactTag: reactTag, callback: { videoView in
+            videoView?.setContentRating(rating)
+        })
+    }
 
     @objc(setLicenseResult:licenseUrl:reactTag:)
     func setLicenseResult(license: NSString, licenseUrl: NSString, reactTag: NSNumber) {

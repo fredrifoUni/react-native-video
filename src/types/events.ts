@@ -227,6 +227,7 @@ export interface ReactVideoEvents {
   onIdle?: () => void; // Android
   onBandwidthUpdate?: (e: OnBandwidthUpdateData) => void; //Android
   onBuffer?: (e: OnBufferData) => void; //Android, iOS
+  onContentRating?: (e: {rating: number}) => void // Android, iOS
   onEnd?: () => void; //All
   onError?: (e: OnVideoErrorData) => void; //Android, iOS
   onExternalPlaybackChange?: (e: OnExternalPlaybackChangeData) => void; //iOS

@@ -1,23 +1,24 @@
 import React, {
-  useState,
+  forwardRef,
   useCallback,
+  useImperativeHandle,
   useMemo,
   useRef,
-  forwardRef,
-  useImperativeHandle,
+  useState,
   type ComponentRef,
-} from 'react';
+} from 'react'
 import {
-  View,
-  StyleSheet,
   Image,
   Platform,
-  type StyleProp,
+  StyleSheet,
+  View,
   type ImageStyle,
   type NativeSyntheticEvent,
-} from 'react-native';
+  type StyleProp,
+} from 'react-native'
 
 import NativeVideoComponent, {
+  VideoManager,
   type OnAudioFocusChangedData,
   type OnAudioTracksData,
   type OnBandwidthUpdateData,
@@ -36,19 +37,18 @@ import NativeVideoComponent, {
   type OnVideoTracksData,
   type VideoComponentType,
   type VideoSrc,
-} from './specs/VideoNativeComponent';
-import {
-  generateHeaderForNative,
-  getReactTag,
-  resolveAssetSourceForVideo,
-} from './utils';
-import {VideoManager} from './specs/VideoNativeComponent';
+} from './specs/VideoNativeComponent'
 import type {
   OnLoadData,
   OnTextTracksData,
   OnReceiveAdEventData,
   ReactVideoProps,
-} from './types';
+} from './types'
+import {
+  generateHeaderForNative,
+  getReactTag,
+  resolveAssetSourceForVideo,
+} from './utils'
 
 export type VideoSaveData = {
   uri: string;
@@ -80,6 +80,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
+      contentRating = 1,
+      onContentRating,
       onLoadStart,
       onLoad,
       onError,
@@ -413,6 +415,13 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       [onAudioFocusChanged],
     );
 
+    const _onContentRating =  useCallback(
+      (e: NativeSyntheticEvent<{rating: number}>) => {
+        onContentRating?.(e.nativeEvent);
+      },
+      [onContentRating],
+    );
+
     const onVideoBuffer = useCallback(
       (e: NativeSyntheticEvent<OnBufferData>) => {
         onBuffer?.(e.nativeEvent);
@@ -539,6 +548,8 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
           selectedTextTrack={_selectedTextTrack}
           selectedAudioTrack={_selectedAudioTrack}
           selectedVideoTrack={_selectedVideoTrack}
+          contentRating={contentRating}
+          onContentRating={_onContentRating}
           onGetLicense={useExternalGetLicense ? onGetLicense : undefined}
           onVideoLoad={onVideoLoad as (e: NativeSyntheticEvent<object>) => void}
           onVideoLoadStart={onVideoLoadStart}

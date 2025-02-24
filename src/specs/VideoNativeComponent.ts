@@ -77,6 +77,8 @@ type SelectedAudioTrack = Readonly<{
   value?: string;
 }>;
 
+export type ConentRating = WithDefault<number, null>;
+
 type SelectedVideoTrackType = WithDefault<string, 'auto'>;
 
 type SelectedVideoTrack = Readonly<{
@@ -313,6 +315,8 @@ export interface VideoNativeProps extends ViewProps {
   trackId?: string; // Android
   useTextureView?: boolean; // Android
   useSecureView?: boolean; // Android
+  contentRating?: number; // tvOS androidTV
+  onContentRating?: DirectEventHandler<{rating: number}>;
   onVideoLoad?: DirectEventHandler<OnLoadData>;
   onVideoLoadStart?: DirectEventHandler<OnLoadStartData>;
   onVideoAspectRatio?: DirectEventHandler<OnVideoAspectRatioData>;

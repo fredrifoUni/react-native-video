@@ -53,6 +53,7 @@ public class VideoEventEmitter {
     private static final String EVENT_TIMED_METADATA = "onTimedMetadata";
     private static final String EVENT_AUDIO_BECOMING_NOISY = "onVideoAudioBecomingNoisy";
     private static final String EVENT_AUDIO_FOCUS_CHANGE = "onAudioFocusChanged";
+    private static final String EVENT_CONTENT_RATING = "onContentRating";
     private static final String EVENT_PLAYBACK_RATE_CHANGE = "onPlaybackRateChange";
     private static final String EVENT_VOLUME_CHANGE = "onVolumeChange";
     private static final String EVENT_AUDIO_TRACKS = "onAudioTracks";
@@ -82,6 +83,7 @@ public class VideoEventEmitter {
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
+            EVENT_CONTENT_RATING,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
@@ -113,6 +115,7 @@ public class VideoEventEmitter {
             EVENT_TIMED_METADATA,
             EVENT_AUDIO_BECOMING_NOISY,
             EVENT_AUDIO_FOCUS_CHANGE,
+            EVENT_CONTENT_RATING,
             EVENT_PLAYBACK_RATE_CHANGE,
             EVENT_VOLUME_CHANGE,
             EVENT_AUDIO_TRACKS,
@@ -135,6 +138,7 @@ public class VideoEventEmitter {
     private static final String EVENT_PROP_DURATION = "duration";
     private static final String EVENT_PROP_PLAYABLE_DURATION = "playableDuration";
     private static final String EVENT_PROP_SEEKABLE_DURATION = "seekableDuration";
+    private static final String EVENT_PROP_CONTENT_RATING = "rating";
     private static final String EVENT_PROP_CURRENT_TIME = "currentTime";
     private static final String EVENT_PROP_CURRENT_PLAYBACK_TIME = "currentPlaybackTime";
     private static final String EVENT_PROP_SEEK_TIME = "seekTime";
@@ -425,6 +429,12 @@ public class VideoEventEmitter {
 
     public void audioBecomingNoisy() {
         receiveEvent(EVENT_AUDIO_BECOMING_NOISY, null);
+    }
+
+    public void contentRatingChange(int rating) {
+        WritableMap map = Arguments.createMap();
+        map.putInt(EVENT_PROP_CONTENT_RATING, rating);
+        receiveEvent(EVENT_CONTENT_RATING, map);
     }
 
     public void receiveAdEvent(String event, Map<String, String> data) {

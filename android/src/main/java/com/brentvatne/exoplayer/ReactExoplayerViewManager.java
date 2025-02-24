@@ -89,6 +89,7 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
     private static final String PROP_SELECTED_VIDEO_TRACK_TYPE = "type";
     private static final String PROP_SELECTED_VIDEO_TRACK_VALUE = "value";
     private static final String PROP_HIDE_SHUTTER_VIEW = "hideShutterView";
+    private static final String PROP_CONTENT_RATING = "contentRating";
     private static final String PROP_CONTROLS = "controls";
     private static final String PROP_SUBTITLE_STYLE = "subtitleStyle";
     private static final String PROP_SHUTTER_COLOR = "shutterColor";
@@ -267,6 +268,11 @@ public class ReactExoplayerViewManager extends ViewGroupManager<ReactExoplayerVi
             value = ReactBridgeUtils.safeGetString(selectedVideoTrack, PROP_SELECTED_VIDEO_TRACK_VALUE);
         }
         videoView.setSelectedVideoTrack(typeString, value);
+    }
+
+    @ReactProp(name = PROP_CONTENT_RATING)
+    public void setContentRating(final ReactExoplayerView videoView, final int rating) {
+        videoView.setContentRating(rating);
     }
 
     @ReactProp(name = PROP_SELECTED_AUDIO_TRACK)
