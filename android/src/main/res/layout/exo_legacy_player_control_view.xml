@@ -39,7 +39,7 @@
             />
 
         <include layout="@layout/nbc_toggle_button" android:id="@id/exo_like" />
-        <LinearLayout android:layout_width="10dp" android:layout_height="wrap_content" />
+        <LinearLayout android:layout_width="20dp" android:layout_height="wrap_content" />
         <include layout="@layout/nbc_toggle_button" android:id="@id/exo_dislike" />
         <LinearLayout android:layout_width="7dp" android:layout_height="wrap_content" />
     </LinearLayout>
