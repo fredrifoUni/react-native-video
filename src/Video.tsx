@@ -80,7 +80,7 @@ const Video = forwardRef<VideoRef, ReactVideoProps>(
       selectedVideoTrack,
       selectedAudioTrack,
       selectedTextTrack,
-      contentRating = 1,
+      contentRating = 0,
       onContentRating,
       onLoadStart,
       onLoad,

@@ -41,6 +41,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     private var _maxBitRate: Float?
 
     private var _automaticallyWaitsToMinimizeStalling = true
+    private var _contentRating = 0
     private var _muted = false
     private var _paused = false
     private var _repeat = false
@@ -742,9 +743,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
     }
 
     // MARK: - Prop setters
-
+    
     @objc
     func setContentRating (_ rating: Int){
+        _contentRating = rating
         _playerViewController?.setContentRating(rating)
     }
 
@@ -1022,6 +1024,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         }
 
         setAudioOutput(_audioOutput)
+        setContentRating(_contentRating)
         setSelectedAudioTrack(_selectedAudioTrackCriteria)
         setSelectedTextTrack(_selectedTextTrackCriteria)
         setResizeMode(_resizeMode)
@@ -1170,6 +1173,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
         // to prevent video from being animated when resizeMode is 'cover'
         // resize mode must be set before subview is added
         setResizeMode(_resizeMode)
+        setContentRating(_contentRating)
 
         guard let _playerViewController else { return }
         // FORK: Children are now added in the createWrapperViewController function
